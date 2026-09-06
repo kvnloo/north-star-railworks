@@ -112,3 +112,11 @@ Pull requests targeting any of these branches run asset checks and a production 
 The **Regenerate locomotive assets** workflow can be run manually from Actions on any branch. Select one model or both. It downloads checksum-pinned Blender 4.5.3, reads the templates, regenerates the models and previews, verifies them, commits the results to the selected branch, and dispatches the Pages workflow. Normal site deployments use checked-in assets and do not render Blender scenes.
 
 For a fork, update the repository links in `index.html` and this README, then create `main`, `dev`, and `nightly`. Run `scripts/configure_github.sh OWNER/REPO` to enable Actions-based Pages deployment and allow the three branches in its environment. Deployment paths derive from the repository name.
+
+## Process walkthrough
+
+The site documents the build in six chapters: drawing studies, template geometry, rendered finish, separated assemblies, motion, and interactive inspection. Change the study selector to see either locomotive’s drawing, actual template excerpt, renders, and nine GLB downloads.
+
+The 12-second assembly replay can be played, paused, or scrubbed; wireframe reveals the exported mesh structure. It animates assembly transforms, not running-engine physics. `web/assembly-motion.js` owns the replay curve; `scripts/verify_motion.mjs` checks its bounds and endpoints. The WebMCP `configure_build_walkthrough` tool exposes study selection, replay position, playback, and wireframe through the same functions as the UI.
+
+Notebook illustrations were generated from finished renders for the explanation. Exact prompts are committed in `previews/studies/prompts.json`; these images were not our initial modeling inputs. See [the reference audit](docs/reference-thread.md) for the original thread’s outputs and differences from this implementation.

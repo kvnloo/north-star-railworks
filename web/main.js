@@ -1,3 +1,5 @@
+import { selectStudy } from './process.js';
+import { separationAt, REPLAY_DURATION } from './assembly-motion.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -26,10 +28,45 @@ let dirty = true;
 let busy = false;
 let renderAvailable = false;
 let previousFrame = performance.now();
+let replaying = false;
+let replayPosition = 0;
+let wireframe = false;
+function setWireframe(value) {
+  wireframe = value;
+  active?.root.traverse(object => {
+    if (!object.isMesh) return;
+    for (const material of Array.isArray(object.material) ? object.material : [object.material]) material.wireframe = value;
+  });
+  $('#wireframe').setAttribute('aria-pressed', String(value));
+  dirty = true;
+}
+function pauseReplay() {
+  replaying = false;
+  $('#replay').textContent = 'Play sequence';
+  $('#replay').setAttribute('aria-pressed', 'false');
+}
+function seekReplay(seconds) {
+  replayPosition = seconds;
+  setExplosion(separationAt(seconds), true);
+  currentExplosion = desiredExplosion;
+  if (active) for (const [key, entry] of active.assemblies) entry.group.position.fromArray(offsets[key]).multiplyScalar(currentExplosion);
+  $('#replay-position').value = seconds;
+  $('#replay-status').textContent = `${seconds.toFixed(1)} / 12s`;
+  dirty = true;
+}
+function playReplay() {
+  if (!active || !renderAvailable) return;
+  if (replaying) { pauseReplay(); return; }
+  if (replayPosition >= REPLAY_DURATION) replayPosition = 0;
+  showAll();
+  replaying = true;
+  $('#replay').textContent = 'Pause sequence';
+  $('#replay').setAttribute('aria-pressed', 'true');
+}
 
 function setBusy(value) {
   busy = value;
-  for (const id of ['explosion', 'assembled', 'exploded', 'show-all', 'side-view', 'reset-view']) $("#" + id).disabled = value || !renderAvailable;
+  for (const id of ['explosion', 'assembled', 'exploded', 'show-all', 'side-view', 'reset-view', 'replay', 'replay-position', 'wireframe']) $("#" + id).disabled = value || !renderAvailable;
 }
 
 function resize() {
@@ -107,6 +144,10 @@ function initViewer() {
     });
     renderer.setAnimationLoop((time) => {
       const delta = Math.min((time - previousFrame) / 1000, 0.1); previousFrame = time;
+      if (replaying && active && !document.hidden) {
+        seekReplay(Math.min(REPLAY_DURATION, replayPosition + delta));
+        if (replayPosition >= REPLAY_DURATION) pauseReplay();
+      }
       const moving = Math.abs(currentExplosion - desiredExplosion) > 0.001;
       if (moving && active) {
         currentExplosion = reduceMotion ? desiredExplosion : THREE.MathUtils.damp(currentExplosion, desiredExplosion, 8, delta);
@@ -162,8 +203,11 @@ function renderAssemblyList() {
 
 async function selectModel(slug) {
   if (!(slug in models)) throw new Error('Unknown locomotive.');
+  pauseReplay(); replayPosition = 0; $('#replay-position').value = 0; $('#replay-status').textContent = 'Ready';
+  setWireframe(false);
   const token = ++sequence;
   selected = slug;
+  void selectStudy(slug);
   const info = models[slug];
   if (active) active.root.visible = false;
   active = null; desiredExplosion = 0; currentExplosion = 0;
@@ -199,12 +243,13 @@ async function selectModel(slug) {
     if (token !== sequence) return;
     console.error(error);
     setBusy(false);
-    for (const id of ['explosion', 'assembled', 'exploded', 'show-all']) $('#' + id).disabled = true;
+    for (const id of ['explosion', 'assembled', 'exploded', 'show-all', 'replay', 'replay-position', 'wireframe']) $('#' + id).disabled = true;
     $('#load-status').textContent = 'The 3D model could not load. Choose the model again to retry. Downloads are still available.';
   }
 }
 
-function setExplosion(percent) {
+function setExplosion(percent, fromReplay = false) {
+  if (!fromReplay) pauseReplay();
   desiredExplosion = percent / 100;
   $('#explosion').value = percent;
   $('#explosion-value').textContent = Math.round(percent) + '%';
@@ -225,15 +270,21 @@ function showAll() {
 function getState() {
   return {
     model: selected, ready: Boolean(active), webglAvailable: renderAvailable, loading: busy,
+    replay: { playing: replaying, seconds: replayPosition, duration: REPLAY_DURATION }, wireframe,
     separation: Math.round(desiredExplosion * 100), objectCount: active?.manifest.object_count ?? 0,
     assemblies: active ? [...active.assemblies].map(([id, e]) => ({ id, name: e.title, visible: e.group.visible, objects: e.count })) : [],
   };
 }
 
+for (const button of document.querySelectorAll('[data-study]')) button.addEventListener('click', () => { void selectModel(button.dataset.study); });
 for (const button of document.querySelectorAll('[data-model]')) button.addEventListener('click', () => { void selectModel(button.dataset.model); });
 $('#explosion').addEventListener('input', (event) => setExplosion(Number(event.target.value)));
 $('#assembled').addEventListener('click', () => setExplosion(0));
 $('#exploded').addEventListener('click', () => setExplosion(100));
+$('#replay').addEventListener('click', playReplay);
+$('#wireframe').addEventListener('click', () => setWireframe(!wireframe));
+$('#replay-position').addEventListener('input', event => { pauseReplay(); seekReplay(Number(event.target.value)); });
+$('#story-replay').addEventListener('click', () => { pauseReplay(); replayPosition = 0; playReplay(); });
 $('#show-all').addEventListener('click', showAll);
 $('#reset-view').addEventListener('click', () => resetCamera());
 $('#side-view').addEventListener('click', () => resetCamera(true));
@@ -289,6 +340,25 @@ if (context?.registerTool) {
       currentExplosion = desiredExplosion;
       for (const [id, e] of active.assemblies) e.group.position.fromArray(offsets[id]).multiplyScalar(currentExplosion);
       controls.update(); renderer.render(scene, camera); dirty = true;
+      return getState();
+    },
+  });
+  register({
+    name: 'configure_build_walkthrough', title: 'Explore the build walkthrough',
+    description: 'Choose the drawing and source study, seek the assembly replay from 0 to 12 seconds, toggle wireframe, or play/pause the replay.',
+    inputSchema: { type: 'object', properties: { study: { type: 'string', enum: ['heritage', 'commodore'] }, seconds: { type: 'number', minimum: 0, maximum: 12 }, wireframe: { type: 'boolean' }, playing: { type: 'boolean' } }, additionalProperties: false },
+    async execute(input) {
+      if (!input || typeof input !== 'object' || Object.keys(input).some(key => !['study', 'seconds', 'wireframe', 'playing'].includes(key))) throw new Error('Invalid walkthrough configuration.');
+      if (input.study !== undefined && !Object.hasOwn(models, input.study)) throw new Error('Unknown study.');
+      if (input.seconds !== undefined && (!Number.isFinite(input.seconds) || input.seconds < 0 || input.seconds > 12)) throw new Error('Replay position must be between 0 and 12.');
+      for (const key of ['playing', 'wireframe']) if (input[key] !== undefined && typeof input[key] !== 'boolean') throw new Error('Expected a boolean.');
+      if (input.study) { await selectStudy(input.study); await selectModel(input.study); }
+      if (!active) throw new Error('The 3D model is not ready.');
+      if (input.seconds !== undefined) { pauseReplay(); seekReplay(input.seconds); }
+      if (input.wireframe !== undefined) setWireframe(input.wireframe);
+      if (input.playing === false) pauseReplay();
+      if (input.playing === true && !replaying) playReplay();
+      controls.update(); renderer.render(scene, camera);
       return getState();
     },
   });
