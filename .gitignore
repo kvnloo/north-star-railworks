@@ -1,0 +1,11 @@
+.tools/
+__pycache__/
+*.blend1
+build.log
+*.zip
+node_modules/
+dist/
+public/generated/
+*-build.log
+*-verification.log
+.DS_Store

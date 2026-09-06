@@ -1,0 +1,52 @@
+name: Regenerate locomotive assets
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Model to regenerate from its JSON template
+        type: choice
+        options: [all, heritage, commodore]
+        default: all
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: regenerate-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download pinned Blender
+        run: |
+          curl --fail --location --retry 3 https://download.blender.org/release/Blender4.5/blender-4.5.3-linux-x64.tar.xz --output /tmp/blender.tar.xz
+          echo '975c58fcb244273838534bba771e64ad87739216b0f9b39a888531a49a72d845  /tmp/blender.tar.xz' | sha256sum --check
+          tar -xf /tmp/blender.tar.xz -C /tmp
+      - name: Generate editable models and renders
+        env:
+          MODEL: ${{ inputs.model }}
+        run: |
+          if [ "$MODEL" = all ]; then
+            /tmp/blender-4.5.3-linux-x64/blender --background --threads 4 --python scripts/build_trains.py
+          else
+            /tmp/blender-4.5.3-linux-x64/blender --background --threads 4 --python scripts/build_trains.py -- "$MODEL"
+          fi
+      - name: Verify generated assets
+        run: |
+          python3 scripts/verify_exports.py
+          /tmp/blender-4.5.3-linux-x64/blender --background --python scripts/verify_blend.py
+      - name: Commit generated files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add models previews
+          if ! git diff --cached --quiet; then
+            git commit -m "Regenerate locomotive assets from templates"
+            git push
+          fi
+      - name: Publish updated branch previews
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref "$GITHUB_REF_NAME"

@@ -1,0 +1,56 @@
+{
+  "builder": "commodore",
+  "title": "Commodore Vanderbilt",
+  "subtitle": "Streamlined Hudson \u00b7 4-6-4",
+  "seed": 42,
+  "drivers": [
+    [
+      -1.5,
+      0.86
+    ],
+    [
+      0.3,
+      0.86
+    ],
+    [
+      2.1,
+      0.86
+    ]
+  ],
+  "small_wheels": [
+    [
+      -3.62,
+      0.44
+    ],
+    [
+      -2.68,
+      0.44
+    ],
+    [
+      3.25,
+      0.43
+    ],
+    [
+      4.15,
+      0.43
+    ]
+  ],
+  "frame_length": 8.8,
+  "frame_center": -0.25,
+  "tender_length": 4.2,
+  "materials": {
+    "navy": [
+      0.023,
+      0.064,
+      0.1
+    ],
+    "steel": [
+      0.44,
+      0.54,
+      0.58
+    ]
+  },
+  "cab_number": "5344",
+  "tender_lettering": "COMMODORE",
+  "body_lettering": "COMMODORE VANDERBILT"
+}

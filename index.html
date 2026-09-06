@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#142126" />
+  <meta name="description" content="Two locomotives, built part by part. Explore the North Star and Commodore Vanderbilt in 3D, inspect their assemblies, and download the editable models." />
+  <title>North Star Railworks · The locomotive collection</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23142126'/%3E%3Cpath d='M16 4l3 9 9 3-9 3-3 9-3-9-9-3 9-3z' fill='%23d8b77d'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/web/style.css" />
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="./" aria-label="North Star Railworks home"><span class="brand-mark" aria-hidden="true">✦</span><span>NORTH STAR<small>R A I L W O R K S</small></span></a>
+    <span class="header-note">THE LOCOMOTIVE COLLECTION <span> / 001—002</span></span>
+    <a class="source-link" href="https://github.com/kvnloo/north-star-railworks" target="_blank" rel="noreferrer">Source & templates <span aria-hidden="true">↗</span></a>
+  </header>
+  <main class="workshop">
+    <section class="exhibit" aria-label="Interactive locomotive viewer">
+      <div class="exhibit-top"><span><i></i> <span id="view-label">ASSEMBLED VIEW</span></span><span id="edition">HERITAGE / 01</span></div>
+      <div id="viewport" tabindex="0" role="img" aria-label="Interactive 3D locomotive. Drag to rotate, scroll to zoom. Use the controls to inspect separate assemblies.">
+        <img id="poster" src="%BASE_URL%generated/previews/heritage.png" alt="Forest-green steam locomotive with brass fittings and a matching coal tender" />
+      </div>
+      <div id="load-status" role="status" aria-live="polite">Preparing the 3D model…</div>
+      <div class="stage-bottom"><span class="gesture">DRAG TO ORBIT <span>·</span> SCROLL TO ZOOM</span><div class="camera-tools"><button id="side-view" type="button">Side view</button><button id="reset-view" type="button">Reset view <span aria-hidden="true">↺</span></button></div></div>
+      <div class="model-switcher" role="group" aria-label="Choose a locomotive">
+        <button class="model-card active" data-model="heritage" aria-pressed="true"><span class="model-number">01</span><img src="%BASE_URL%generated/previews/heritage.png" alt="" /><span><strong>North Star No. 07</strong><small>HERITAGE MOGUL · 2-6-0</small></span><span class="card-arrow" aria-hidden="true">↗</span></button>
+        <button class="model-card" data-model="commodore" aria-pressed="false"><span class="model-number">02</span><img src="%BASE_URL%generated/previews/commodore.png" alt="" /><span><strong>Commodore Vanderbilt</strong><small>STREAMLINED HUDSON · 4-6-4</small></span><span class="card-arrow" aria-hidden="true">↗</span></button>
+      </div>
+    </section>
+    <aside class="inspector" aria-label="Model and assembly controls">
+      <div class="intro"><div class="eyebrow">BUILT PART BY PART</div><h1 id="model-title">North Star<br>No. 07</h1><p id="model-description">Forest green, warm brass, and an open running gear. A tribute to the age of steam.</p><div class="specs"><div><strong id="wheel-spec">2-6-0</strong><span>WHEEL ARRANGEMENT</span></div><div><strong id="part-count">793</strong><span>EDITABLE OBJECTS</span></div></div></div>
+      <section class="assembly-section"><div class="section-heading"><h2>Take it apart</h2><span id="explosion-value">0%</span></div><div class="view-switch" role="group" aria-label="Assembly view"><button id="assembled" aria-pressed="true">Assembled</button><button id="exploded" aria-pressed="false">Exploded</button></div><label class="range-label" for="explosion">Assembly separation</label><input id="explosion" type="range" min="0" max="100" value="0" step="1" /><div class="range-ends"><span>TOGETHER</span><span>APART</span></div></section>
+      <section class="parts-section"><div class="section-heading"><h2>Assemblies</h2><button id="show-all">Show all</button></div><div id="assembly-list" aria-label="Visible assemblies"></div></section>
+      <a id="download-model" class="download" href="%BASE_URL%generated/models/heritage/heritage.blend" download><span>Download Blender model<small>Editable parts + exploded scene</small></span><span aria-hidden="true">↓</span></a>
+      <p class="inspector-foot">Original interpretations. Made with Python & Blender.</p>
+    </aside>
+  </main>
+  <footer><span>DESIGNED TO BE TAKEN APART.</span><nav aria-label="Build environments"><a id="main-link">Main</a><a id="dev-link">Dev</a><a id="nightly-link">Nightly</a></nav><span>EST. 2026 <span class="footer-star">✦</span></span></footer>
+  <script type="module" src="/web/main.js"></script>
+</body>
+</html>

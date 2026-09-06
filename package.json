@@ -1,0 +1,20 @@
+{
+  "name": "north-star-railworks",
+  "version": "1.0.0",
+  "description": "Parametric Blender locomotives and an interactive assembly viewer",
+  "scripts": {
+    "prepare-assets": "node scripts/prepare_site.mjs",
+    "predev": "npm run prepare-assets",
+    "dev": "vite",
+    "prebuild": "npm run prepare-assets",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "node --check web/main.js && node --check scripts/prepare_site.mjs && python3 scripts/verify_exports.py"
+  },
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "three": "^0.185.1",
+    "vite": "^8.2.2"
+  }
+}

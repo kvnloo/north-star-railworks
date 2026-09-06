@@ -1,0 +1,73 @@
+name: Build and deploy Pages
+on:
+  push:
+    branches: [main, dev, nightly]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    name: Build ${{ matrix.branch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: [main, dev, nightly]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Check assets and source
+        run: npm run check
+      - name: Set branch base path
+        env:
+          BRANCH: ${{ matrix.branch }}
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          if [ "$BRANCH" = main ]; then
+            echo "BASE_PATH=/$REPO_NAME/" >> "$GITHUB_ENV"
+          else
+            echo "BASE_PATH=/$REPO_NAME/$BRANCH/" >> "$GITHUB_ENV"
+          fi
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-${{ matrix.branch }}
+          path: dist
+          retention-days: 3
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: site-*
+          path: builds
+      - name: Assemble production and branch previews
+        run: |
+          mkdir -p site/dev site/nightly
+          cp -a builds/site-main/. site/
+          cp -a builds/site-dev/. site/dev/
+          cp -a builds/site-nightly/. site/nightly/
+          touch site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@v4

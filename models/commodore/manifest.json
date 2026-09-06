@@ -1,0 +1,17 @@
+{
+  "title": "Commodore Vanderbilt",
+  "source": "https://x.com/tomkrcha/status/2095756085890310311",
+  "interpretation": "Original reference-inspired design, not a dimensionally exact replica.",
+  "object_count": 873,
+  "assemblies": {
+    "02 \u2022 Chassis": 6,
+    "03 \u2022 Wheels and axles": 297,
+    "04 \u2022 Valve gear": 58,
+    "01 \u2022 Streamlined casing": 109,
+    "05 \u2022 Cab and controls": 30,
+    "06 \u2022 Fittings and pilot": 16,
+    "07 \u2022 Tender body": 188,
+    "08 \u2022 Tender bogies": 164,
+    "09 \u2022 Couplers": 5
+  }
+}

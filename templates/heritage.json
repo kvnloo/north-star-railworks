@@ -1,0 +1,52 @@
+{
+  "builder": "heritage",
+  "title": "North Star No. 07",
+  "subtitle": "Heritage Mogul \u00b7 2-6-0",
+  "seed": 42,
+  "drivers": [
+    [
+      -1.65,
+      0.79
+    ],
+    [
+      0,
+      0.79
+    ],
+    [
+      1.65,
+      0.79
+    ]
+  ],
+  "small_wheels": [
+    [
+      -3.5,
+      0.43
+    ]
+  ],
+  "frame_length": 7.05,
+  "frame_center": -0.125,
+  "dome_positions": [
+    -1.22,
+    0.7
+  ],
+  "tender_length": 3.5,
+  "materials": {
+    "green": [
+      0.035,
+      0.17,
+      0.105
+    ],
+    "brass": [
+      0.69,
+      0.4,
+      0.13
+    ],
+    "red": [
+      0.29,
+      0.032,
+      0.022
+    ]
+  },
+  "cab_number": "07",
+  "tender_lettering": "NORTH STAR"
+}
