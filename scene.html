@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#172c29"/>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23172c29'/%3E%3Cpath d='M16 4l3 9 9 3-9 3-3 9-3-9-9-3 9-3z' fill='%23dfc591'/%3E%3C/svg%3E"/>
+  <title>Ravenfell Valley · North Star Railworks</title>
+  <meta name="description" content="A cinematic mountain railway. Follow four steam trains through forests, a stone tunnel, and the stations of Ravenfell Valley."/>
+  <link rel="stylesheet" href="/web/valley/scene.css"/>
+</head>
+<body>
+  <canvas id="scene-canvas" tabindex="0" aria-label="Interactive mountain railway scene" aria-describedby="camera-help">A mountain railway with four trains, two stations, a forest, and a tunnel. Use the controls to choose a train and camera.</canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <header><a href="./">✦ NORTH STAR <span>RAILWORKS</span></a><a href="./#workshop">Back to the workshop ↗</a></header>
+  <div id="loading" aria-labelledby="loading-title">
+    <span class="loading-mark" aria-hidden="true">✦</span>
+    <h2 id="loading-title">Ravenfell Valley</h2>
+    <p id="loading-text" role="status" aria-live="polite" aria-atomic="true">Preparing the mountain railway…</p>
+    <div class="loading-actions"><button id="retry-scene" type="button">Reload scene</button><a href="./#workshop">Return to the workshop ↗</a></div>
+    <noscript><p>This scene needs JavaScript and WebGL. Enable JavaScript or return to the workshop.</p></noscript>
+  </div>
+  <div class="scene-title"><p>FIELD NOTES / 003</p><h1>Ravenfell<br><em>Valley.</em></h1><span>A railway through the northern wilds</span></div>
+  <div class="shot-info"><span id="shot-number">01 / 05</span><strong id="shot-name">The forest approach</strong><span id="shot-description">Low pursuit along the railway</span></div>
+  <button id="restore-ui" type="button" hidden>Show controls</button>
+  <section class="control-dock" aria-label="Railway controls" inert>
+    <div class="transport">
+      <button id="play" type="button" aria-pressed="true" aria-label="Pause railway">Ⅱ</button>
+      <div><label for="train">FOLLOWING</label><select id="train"><option value="0">North Star · Morning service</option><option value="1">Commodore · Highland express</option><option value="2">North Star · Valley local</option><option value="3">Commodore · Evening mail</option></select></div>
+      <button id="hud" type="button" title="Hide interface. Press H or use Show controls to restore.">Hide UI</button>
+    </div>
+    <nav aria-label="Camera views">
+      <button type="button" data-camera="cinematic" aria-pressed="true">Director’s cut</button><button type="button" data-camera="fpv" aria-pressed="false">FPV drone</button><button type="button" data-camera="trackside" aria-pressed="false">Trackside</button><button type="button" data-camera="aerial" aria-pressed="false">Aerial</button><button type="button" data-camera="tunnel" aria-pressed="false">Tunnel</button><button type="button" data-camera="town" aria-pressed="false">Town & stations</button><button type="button" data-camera="orbit" aria-pressed="false">Free orbit</button>
+    </nav>
+    <details id="advanced-controls" open>
+    <summary>Playback & display settings</summary>
+    <div class="settings">
+      <label for="speed">PACE <input id="speed" type="range" min="0.3" max="2" step="0.1" value="1" aria-valuetext="1 times normal speed"/><output id="speed-value" for="speed" aria-hidden="true">1×</output></label>
+      <label for="quality">DETAIL <select id="quality"><option value="balanced">Balanced</option><option value="high">High</option></select></label>
+      <button id="fullscreen" type="button" aria-pressed="false">Fullscreen ↗</button><button id="about" type="button" aria-haspopup="dialog" aria-controls="notes">Scene notes & help</button><span id="fps" aria-hidden="true"></span>
+    </div>
+    </details>
+  </section>
+  <p id="ui-status" class="sr-only" role="status"></p>
+  <dialog id="notes" aria-labelledby="notes-title">
+    <button id="close-notes" type="button" aria-label="Close scene notes" autofocus>×</button>
+    <p>THE MAKING OF THE VALLEY</p><h2 id="notes-title">Scale, atmosphere,<br>and a working railway.</h2>
+    <h3>Controls</h3>
+    <p id="camera-help">Choose a camera view above. In Free orbit, drag to rotate, scroll or pinch to zoom, and use two fingers to pan on a touchscreen.</p>
+    <p>Use Tab to reach controls and Enter or Space to activate buttons. Use arrow keys on the pace slider and train selector. Outside controls, Space plays or pauses the railway and H hides or restores the interface. Escape closes these notes.</p>
+    <p>If your device requests reduced motion, the railway starts paused. Press Play when you are ready.</p>
+    <p>Four services follow two mountain loops past Ravenfell Junction and Pinewatch. The original Python-built locomotives are reused here, with passenger coaches, a rocky tunnel, and a timber settlement.</p>
+    <p>The landscape, track, buildings, ferns, and rocks are generated from a fixed seed. EZ-Tree supplies branching trees and foliage; Poly Haven supplies CC0 mossy ground and cliff textures. Warm sunlight, soft shadows, moving steam, and layered haze tie the scene together.</p>
+    <p>Visual direction draws on the Nordic forests of God of War and Assassin’s Creed Valhalla. Their artwork and game assets are not included.</p>
+    <p>This is a browser scene with fixed-route train animation, not a railway physics simulator. Use High detail for sharper shadows and rendering, or Balanced for lighter GPU use.</p>
+    <a href="https://github.com/kvnloo/north-star-railworks/blob/nightly/docs/valley.md">Source, references & asset credits ↗</a>
+  </dialog>
+  <script type="module" src="/web/valley/controls.js"></script>
+  <script type="module" src="/web/valley/scene.js"></script>
+</body>
+</html>

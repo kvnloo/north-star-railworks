@@ -9,3 +9,6 @@ public/generated/
 *-build.log
 *-verification.log
 .DS_Store
+artifacts/
+test-results/
+playwright-report/

@@ -122,3 +122,16 @@ The 12-second assembly replay can be played, paused, or scrubbed; wireframe reve
 Notebook illustrations were generated from finished renders for the explanation. Exact prompts are committed in `previews/studies/prompts.json`; these images were not our initial modeling inputs. See [the reference audit](docs/reference-thread.md) for the original thread’s outputs and differences from this implementation.
 
 The exploded layout measures the nine exported assembly bounds and packs them into three separated rows in the default camera view. Outer fittings and body assemblies move first; the undercarriage follows. Each group uses a staggered quintic easing curve, with a longer exploded hold and reverse-order reassembly. Camera framing follows the actual moving bounds. Orbiting can naturally place one group behind another; Reset view restores the separated presentation. `scripts/verify_layout.mjs` loads both sets of actual GLBs, checks all 36 assembly pairs for projected overlap, and checks camera clipping throughout separation at four aspect ratios.
+
+## Ravenfell Valley scene
+
+Open the interactive mountain railway at `scene.html`. Start the local Vite server first because the scene loads ES modules and generated assets:
+
+```sh
+npm ci
+npm run dev
+```
+
+Then open `http://127.0.0.1:5173/scene.html`. The scene also ships in the [nightly preview](https://kvnloo.github.io/north-star-railworks/nightly/scene.html) when that branch is deployed. Use the train menu, pace slider, play button or Space, six camera modes, Balanced or High detail, Free orbit controls, Hide UI or H, and Fullscreen. `prefers-reduced-motion` starts playback paused.
+
+Ravenfell Valley contains two offset scenic loops, two stations, a town, a lake, a tunnel, and four scheduled visual services. It follows fixed seeded paths and positions. It does not simulate dispatch, collisions, station stops, wheel motion, or steam physics. See [`docs/valley.md`](docs/valley.md) for the source map, controls, build details, and asset credits. The machine-readable asset record is [`scene-assets/credits.json`](scene-assets/credits.json).

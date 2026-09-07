@@ -1,0 +1,50 @@
+{
+  "scene": "Ravenfell Valley",
+  "generatedAtBuild": "scripts/prepare_site.mjs copies this directory to public/generated/scene/",
+  "assets": [
+    {
+      "name": "Forest Leaves 02",
+      "creator": "Rob Tuytel",
+      "source": "https://polyhaven.com/a/forest_leaves_02",
+      "license": "CC0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "files": ["forest-diffuse.jpg", "forest-normal.jpg"],
+      "mapType": "diffuse and OpenGL normal",
+      "resolution": "2048x2048"
+    },
+    {
+      "name": "Aerial Rocks 02",
+      "creator": "Rob Tuytel",
+      "source": "https://polyhaven.com/a/aerial_rocks_02",
+      "license": "CC0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "files": ["rock-diffuse.jpg", "rock-normal.jpg"],
+      "mapType": "diffuse and OpenGL normal",
+      "resolution": "2048x2048"
+    },
+    {
+      "name": "EZ-Tree",
+      "creator": "Daniel Greenheck",
+      "version": "1.1.0",
+      "source": "https://github.com/dgreenheck/ez-tree",
+      "license": "MIT",
+      "licenseFile": "ez-tree-LICENSE.txt",
+      "usage": "Procedural tree geometry and preset foliage maps"
+    },
+    {
+      "name": "Three.js",
+      "source": "https://github.com/mrdoob/three.js",
+      "license": "MIT",
+      "usage": "Rendering, geometry, loaders, controls, and post-processing",
+      "licenseFileAfterInstall": "node_modules/three/LICENSE"
+    },
+    {
+      "name": "DM Sans",
+      "source": "https://fonts.google.com/specimen/DM+Sans",
+      "license": "SIL Open Font License 1.1",
+      "licenseUrl": "https://github.com/google/fonts/blob/main/ofl/dmsans/OFL.txt",
+      "usage": "Optional web UI font requested by web/valley/scene.css",
+      "fallback": "System sans-serif"
+    }
+  ]
+}

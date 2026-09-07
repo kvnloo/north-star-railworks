@@ -9,12 +9,18 @@
     "prebuild": "npm run prepare-assets",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "node --check web/main.js && node --check web/process.js && node --check scripts/prepare_site.mjs && node scripts/verify_motion.mjs && node scripts/verify_layout.mjs && python3 scripts/verify_exports.py"
+    "check": "node --check web/main.js && node --check web/process.js && node --check scripts/prepare_site.mjs && node scripts/verify_motion.mjs && node scripts/verify_layout.mjs && python3 scripts/verify_exports.py && npm run check:valley",
+    "check:valley": "node scripts/verify_valley_suite.mjs",
+    "check:browser": "node scripts/verify_valley_browser.mjs"
   },
   "type": "module",
   "private": true,
   "dependencies": {
+    "@dgreenheck/ez-tree": "^1.1.0",
     "three": "^0.185.1",
     "vite": "^8.2.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
   }
 }

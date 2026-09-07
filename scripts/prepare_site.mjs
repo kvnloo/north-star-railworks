@@ -11,3 +11,5 @@ for (const model of ['heritage', 'commodore']) {
   }
 }
 await cp(new URL('../previews/', import.meta.url), new URL('previews/', output), { recursive: true });
+
+await cp(new URL('../scene-assets/', import.meta.url), new URL('scene/', output), { recursive: true });
