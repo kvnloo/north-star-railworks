@@ -36,7 +36,7 @@
     <summary>Playback & display settings</summary>
     <div class="settings">
       <label for="speed">PACE <input id="speed" type="range" min="0.3" max="2" step="0.1" value="1" aria-valuetext="1 times normal speed"/><output id="speed-value" for="speed" aria-hidden="true">1×</output></label>
-      <label for="quality">DETAIL <select id="quality"><option value="balanced">Balanced</option><option value="high">High</option></select></label>
+      <label for="quality">DETAIL <select id="quality"><option value="auto" selected>Auto · device tuned</option><option value="balanced">Balanced</option><option value="high">High</option></select></label>
       <button id="fullscreen" type="button" aria-pressed="false">Fullscreen ↗</button><button id="about" type="button" aria-haspopup="dialog" aria-controls="notes">Scene notes & help</button><span id="fps" aria-hidden="true"></span>
     </div>
     </details>

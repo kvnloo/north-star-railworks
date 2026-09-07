@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+const {AdaptiveResolution}=await import('../web/valley/adaptive-resolution.js').catch(()=>({}));
+assert.equal(typeof AdaptiveResolution,'function','Auto detail needs a measured controller, not a device-name guess');
+const control=new AdaptiveResolution({maxRatio:1.5});
+assert.equal(control.ratio,1);
+for(let i=0;i<1200;i++)control.sample(16.7);
+assert(control.ratio>1,'sustained headroom should increase sampling quality');
+const high=control.ratio;
+control.sample(200);assert.equal(control.ratio,high,'one long frame must not trigger quality oscillation');
+for(let i=0;i<1800;i++)control.sample(50);
+assert.equal(control.ratio,1,'sustained load returns to accepted baseline resolution');
+for(let i=0;i<1000;i++)control.sample(200);
+assert.equal(control.ratio,1,'auto must never fall below approved baseline quality');
+const capped=new AdaptiveResolution({maxRatio:1});for(let i=0;i<2000;i++)capped.sample(10);assert.equal(capped.ratio,1);
+const paused=control.ratio;control.sample(NaN);control.sample(0);control.sample(10000);assert.equal(control.ratio,paused);
+console.log('PASS adaptive resolution promotes sustained headroom, demotes sustained pressure, rejects invalid/hidden gaps and preserves quality floor');

@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import * as THREE from 'three';
+const module=await import('../web/valley/runtime-performance.js').catch(()=>({}));
+assert.equal(typeof module.freezeStaticScene,'function','static scene must avoid redundant transform work');
+const scene=new THREE.Scene(),group=new THREE.Group(),mesh=new THREE.Mesh(new THREE.BoxGeometry(),new THREE.MeshStandardMaterial());
+group.position.set(4,5,6);mesh.position.set(2,3,4);group.add(mesh);scene.add(group);scene.updateMatrixWorld(true);
+const before=mesh.matrixWorld.clone();let updates=0;const update=mesh.updateMatrix.bind(mesh);mesh.updateMatrix=()=>{updates++;update();};
+module.freezeStaticScene(scene);
+const moving=new THREE.Group();scene.add(moving);moving.position.set(2,0,0);scene.updateMatrixWorld(true);moving.position.x=5;scene.updateMatrixWorld(true);
+assert.equal(updates,1,'freeze computes once; subsequent frames do not recompose static transforms');assert.deepEqual(mesh.matrixWorld.elements,before.elements);assert.equal(moving.matrixWorld.elements[12],5);
+assert.equal(mesh.geometry.attributes.position.count,24);assert.equal(mesh.material.roughness,1);
+console.log('PASS static transform freeze preserves geometry, material and world pose; later dynamic children remain live');
+assert.equal(typeof module.warmScene,'function','shader warmup must run before playback');
+const texture=new THREE.Texture();mesh.material.map=texture;let compiled=false;const uploaded=[];
+mesh.visible=false;const hidden=mesh.visible;let warmRendered=false,currentTarget=null;const renderer={initTexture:t=>uploaded.push(t),compileAsync:async(s,c)=>{assert.equal(s,scene);assert(c.isCamera);compiled=true;},getRenderTarget:()=>currentTarget,setRenderTarget:t=>{currentTarget=t;},shadowMap:{needsUpdate:false},render(s,c){assert.equal(s,scene);assert(c.isCamera);assert(mesh.visible);assert.equal(mesh.frustumCulled,false);assert(currentTarget?.isWebGLRenderTarget);warmRendered=true;}};
+await module.warmScene(scene,new THREE.PerspectiveCamera(),renderer);
+assert(warmRendered,'warmup must exercise real depth/shadow and offscreen material variants, not just compile visible color materials');assert.equal(mesh.visible,hidden);assert.equal(mesh.frustumCulled,true);assert.equal(currentTarget,null);assert(renderer.shadowMap.needsUpdate);
+assert(compiled);assert.deepEqual(uploaded,[texture]);console.log('PASS all material textures uploaded and asynchronous shader compilation awaited');

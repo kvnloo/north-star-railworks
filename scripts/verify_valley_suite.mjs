@@ -6,4 +6,4 @@ function run(args){
  if(result.status!==0)process.exit(result.status||1);
 }
 for(const file of readdirSync('web/valley').filter(name=>name.endsWith('.js')).sort())run(['--check',`web/valley/${file}`]);
-for(const file of ['verify_valley','verify_valley_trains','verify_cameras','verify_forest','verify_steam','verify_tunnel','verify_render_quality'])run([`scripts/${file}.mjs`]);
+for(const file of ['verify_valley','verify_valley_trains','verify_cameras','verify_forest','verify_steam','verify_tunnel','verify_render_quality','verify_runtime_performance','verify_adaptive_resolution'])run([`scripts/${file}.mjs`]);

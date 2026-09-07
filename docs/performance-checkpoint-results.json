@@ -1,0 +1,198 @@
+{
+  "runs": [
+    {
+      "run": "performance-baseline",
+      "url": "https://kvnloo.github.io/north-star-railworks/nightly/scene.html",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "cpuThrottle": 1,
+      "readyMs": 3279,
+      "summary": {
+        "frames": 7167,
+        "durationMs": 239990.5,
+        "averageFps": 29.863682104083285,
+        "p50Ms": 33.30000000000291,
+        "p95Ms": 50.10000000000582,
+        "p99Ms": 66.70000000001164,
+        "p999Ms": 83.39999999999418,
+        "reciprocalP999Fps": 11.990407673861748,
+        "slowestPointOnePercentFps": 4.4853106077595815,
+        "tailSamples": 8,
+        "over50ms": 490,
+        "over100ms": 5,
+        "maxMs": 983.2999999999993
+      },
+      "errors": [],
+      "gpu": "ANGLE (AMD, AMD Radeon R9 M370X (radeonsi verde ACO), OpenGL ES 3.2)"
+    },
+    {
+      "run": "performance-warm",
+      "url": "http://127.0.0.1:4173/north-star-railworks/nightly/scene.html",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "cpuThrottle": 1,
+      "readyMs": 16932,
+      "summary": {
+        "frames": 1683,
+        "durationMs": 59997.6,
+        "averageFps": 28.051122044881797,
+        "p50Ms": 33.30000000000291,
+        "p95Ms": 66.60000000000582,
+        "p99Ms": 66.80000000000291,
+        "p999Ms": 200,
+        "reciprocalP999Fps": 5,
+        "slowestPointOnePercentFps": 1.714236736093248,
+        "tailSamples": 2,
+        "over50ms": 176,
+        "over100ms": 3,
+        "maxMs": 966.7000000000044
+      },
+      "errors": [],
+      "gpu": "ANGLE (AMD, AMD Radeon R9 M370X (radeonsi verde ACO), OpenGL ES 3.2)"
+    },
+    {
+      "run": "performance-warm-full",
+      "url": "http://127.0.0.1:4173/north-star-railworks/nightly/scene.html",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "cpuThrottle": 1,
+      "readyMs": 17295,
+      "summary": {
+        "frames": 1710,
+        "durationMs": 59980.9,
+        "averageFps": 28.50907538899883,
+        "p50Ms": 33.30000000000291,
+        "p95Ms": 66.60000000000582,
+        "p99Ms": 66.70000000000437,
+        "p999Ms": 83.30000000000291,
+        "reciprocalP999Fps": 12.004801920767887,
+        "slowestPointOnePercentFps": 11.997600479903705,
+        "tailSamples": 2,
+        "over50ms": 192,
+        "over100ms": 0,
+        "maxMs": 83.40000000000146
+      },
+      "errors": [],
+      "gpu": "ANGLE (AMD, AMD Radeon R9 M370X (radeonsi verde ACO), OpenGL ES 3.2)"
+    },
+    {
+      "run": "performance-candidate",
+      "url": "http://127.0.0.1:4173/north-star-railworks/nightly/scene.html",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "cpuThrottle": 1,
+      "readyMs": 17679,
+      "summary": {
+        "frames": 7229,
+        "durationMs": 239990.40000000002,
+        "averageFps": 30.122038214861924,
+        "p50Ms": 33.30000000000291,
+        "p95Ms": 50.10000000000582,
+        "p99Ms": 66.70000000000437,
+        "p999Ms": 83.30000000001746,
+        "reciprocalP999Fps": 12.004801920765791,
+        "slowestPointOnePercentFps": 11.992205066706928,
+        "tailSamples": 8,
+        "over50ms": 450,
+        "over100ms": 0,
+        "maxMs": 83.40000000000146
+      },
+      "errors": [],
+      "gpu": "ANGLE (AMD, AMD Radeon R9 M370X (radeonsi verde ACO), OpenGL ES 3.2)"
+    },
+    {
+      "run": "performance-baseline-repeat",
+      "url": "https://kvnloo.github.io/north-star-railworks/nightly/scene.html",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "cpuThrottle": 1,
+      "readyMs": 13228,
+      "summary": {
+        "frames": 6395,
+        "durationMs": 239990.30000000002,
+        "averageFps": 26.646910312625135,
+        "p50Ms": 33.30000000000291,
+        "p95Ms": 66.59999999999854,
+        "p99Ms": 133.20000000001164,
+        "p999Ms": 666.6000000000058,
+        "reciprocalP999Fps": 1.500150015001487,
+        "slowestPointOnePercentFps": 0.6752715556327278,
+        "tailSamples": 7,
+        "over50ms": 517,
+        "over100ms": 64,
+        "maxMs": 3299.7999999999884
+      },
+      "errors": [],
+      "gpu": "ANGLE (AMD, AMD Radeon R9 M370X (radeonsi verde ACO), OpenGL ES 3.2)"
+    },
+    {
+      "run": "mobile-baseline",
+      "url": "https://kvnloo.github.io/north-star-railworks/nightly/scene.html",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "cpuThrottle": 4,
+      "readyMs": 32098,
+      "summary": {
+        "frames": 1067,
+        "durationMs": 119945.20000000001,
+        "averageFps": 8.895729049599316,
+        "p50Ms": 116.60000000000582,
+        "p95Ms": 183.3000000000029,
+        "p99Ms": 233.29999999999563,
+        "p999Ms": 416.70000000000437,
+        "reciprocalP999Fps": 2.399808015358746,
+        "slowestPointOnePercentFps": 0.7407407407407407,
+        "tailSamples": 2,
+        "over50ms": 977,
+        "over100ms": 569,
+        "maxMs": 2283.2999999999956
+      },
+      "errors": [],
+      "gpu": "ANGLE (AMD, AMD Radeon R9 M370X (radeonsi verde ACO), OpenGL ES 3.2)"
+    },
+    {
+      "run": "mobile-candidate",
+      "url": "http://127.0.0.1:4173/north-star-railworks/nightly/scene.html",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "cpuThrottle": 4,
+      "readyMs": 40174,
+      "summary": {
+        "frames": 1186,
+        "durationMs": 119928.49999999999,
+        "averageFps": 9.889225663624577,
+        "p50Ms": 83.40000000000873,
+        "p95Ms": 166.70000000001164,
+        "p99Ms": 249.99999999998545,
+        "p999Ms": 749.8999999999942,
+        "reciprocalP999Fps": 1.333511134817986,
+        "slowestPointOnePercentFps": 0.9678199854827002,
+        "tailSamples": 2,
+        "over50ms": 938,
+        "over100ms": 565,
+        "maxMs": 1316.6000000000058
+      },
+      "errors": [],
+      "gpu": "ANGLE (AMD, AMD Radeon R9 M370X (radeonsi verde ACO), OpenGL ES 3.2)"
+    }
+  ],
+  "browser_checks": 49,
+  "errors": [],
+  "failures": [],
+  "image_regions": 30,
+  "regions_identical": true
+}

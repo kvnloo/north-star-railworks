@@ -8,6 +8,8 @@ import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {makeEnvironment,makeLake} from './environment.js';
 import {makeRailway,makeTunnel} from './railway.js';
 import {makeTown} from './town.js';
+import {freezeStaticScene,warmScene,applyRenderQuality} from './runtime-performance.js';
+import {AdaptiveResolution} from './adaptive-resolution.js';
 import {loadTrains,positionTrain,makeSteam} from './trains.js';
 import {cameraShot,blendCamera,CAMERA_MODES,SHOT_NAMES,cameraFloor} from './cameras.js';
 
@@ -16,13 +18,14 @@ const motionPreference=matchMedia('(prefers-reduced-motion: reduce)');
 let reduced=motionPreference.matches;
 let seconds=0,playing=!reduced,pace=1,mode='cinematic',selected=0,ready=false;
 let renderer,composer,camera,controls,scene,environment,trains,steam,lake,sun;
-let dirty=true,settled=false,lastShot='',quality='balanced';
+let dirty=true,settled=false,lastShot='',quality='auto';
+const adaptive=new AdaptiveResolution({maxRatio:Math.min(devicePixelRatio,1.5)});
 let frameTotal=0,frameTime=0,lastFrameMs=0,shadowElapsed=0;
 let drawCalls=0,triangles=0,renderedFrames=0;
 const invalidate=()=>{dirty=true;};
 
 function setPlaying(value){
- playing=value;invalidate();
+ playing=value;adaptive.reset();invalidate();
  $('#play').textContent=playing?'Ⅱ':'▶';
  $('#play').setAttribute('aria-pressed',String(playing));
  $('#play').setAttribute('aria-label',playing?'Pause railway':'Play railway');
@@ -41,18 +44,14 @@ function setMode(next){
  }
 }
 function resize(){
- if(!renderer)return;
- camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);composer?.setSize(innerWidth,innerHeight);
- settled=false;invalidate();
+ if(!composer)return;
+ const pixelRatio=quality==='auto'?adaptive.ratio:Math.min(devicePixelRatio,quality==='high'?1.5:1);
+ applyRenderQuality({renderer,composer,camera,sun,pixelRatio,shadowSize:quality==='high'?2048:1024,width:innerWidth,height:innerHeight});
+ settled=false;adaptive.reset();invalidate();
 }
 function setQuality(value){
- quality=value;
- const high=value==='high';
- renderer.setPixelRatio(Math.min(devicePixelRatio,high?1.5:1));composer.setPixelRatio(renderer.getPixelRatio());
- sun.shadow.mapSize.setScalar(high?2048:1024);
- sun.shadow.map?.dispose();sun.shadow.map=null;renderer.shadowMap.needsUpdate=true;
- resize();
+ if(!['auto','balanced','high'].includes(value))throw Error('Unknown detail setting');
+ quality=value;resize();
 }
 function updateCamera(dt,immediate=false){
  const train=trains[selected];
@@ -109,15 +108,18 @@ async function init(){
   environment=await makeEnvironment(scene,renderer);lake=makeLake(scene);
   const materials={wood:new THREE.MeshStandardMaterial({color:0x655140,roughness:1}),ballast:new THREE.MeshStandardMaterial({color:0x706f5c,roughness:1})};
   makeRailway(scene,materials);makeTunnel(scene,environment.rockMat);makeTown(scene,environment.rockMat);
+  freezeStaticScene(scene);
   trains=await loadTrains(scene,text=>$('#loading-text').textContent=text);steam=makeSteam(scene);
   composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));
   composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.10,.45,1.1));composer.addPass(new OutputPass());
-  updateWorld();updateCamera(0,true);if(environment.update)environment.update(camera,0);render();
+  updateWorld();updateCamera(0,true);if(environment.update)environment.update(camera,0);
+  $('#loading-text').textContent='Preparing shaders and textures…';
+  await warmScene(scene,camera,renderer);render();
   ready=true;$('#loading').classList.add('hidden');setPlaying(playing);registerTools();
   let previous=performance.now();
   renderer.setAnimationLoop(now=>{
    const elapsed=Math.max(0,(now-previous)/1000);previous=now;
-   if(document.hidden)return;
+   if(document.hidden){adaptive.reset();return;}
    const dt=Math.min(elapsed,.25);
    if(!playing&&!dirty&&settled)return;
    if(playing)seconds+=dt*pace;
@@ -128,7 +130,9 @@ async function init(){
     renderer.shadowMap.needsUpdate=true;shadowElapsed=0;
    }
    const start=performance.now();render();lastFrameMs=performance.now()-start;dirty=false;
-   if(playing){frameTotal++;frameTime+=elapsed;
+   if(playing){
+    if(quality==='auto'){const ratio=adaptive.sample(elapsed*1000);if(ratio!==renderer.getPixelRatio())resize();}
+    frameTotal++;frameTime+=elapsed;
     if(frameTime>1){$('#fps').textContent=`${Math.round(frameTotal/frameTime)} FPS`;frameTotal=0;frameTime=0;}
    }
   });
@@ -138,6 +142,9 @@ function state(){
  const gl=renderer?.getContext(),debug=gl?.getExtension('WEBGL_debug_renderer_info');
  return {ready,playing,reducedMotion:reduced,seconds,pace,camera:mode,selectedTrain:selected,quality,
   eye:camera?.position.toArray(),renderedFrames,lastFrameMs,
+  pixelRatio:renderer?.getPixelRatio(),drawingBuffer:gl?[gl.drawingBufferWidth,gl.drawingBufferHeight]:null,
+  composerBuffer:composer?[composer.readBuffer.width,composer.readBuffer.height]:null,adaptiveP95Ms:adaptive.p95Ms,
+  rendererBackend:'webgl2',shaderPrograms:renderer?.info.programs?.length,
   gpu:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):'unavailable',
   trains:trains?.map(t=>({name:t.name,line:t.line,position:t.t})),
   environment:{trees:environment?.treeCount,rocks:environment?.rockCount,ferns:environment?.fernCount,stations:2,tunnels:1},drawCalls,triangles};

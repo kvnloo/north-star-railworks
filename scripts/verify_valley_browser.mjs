@@ -8,8 +8,8 @@ await mkdir(out,{recursive:true});
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH,args:['--use-gl=angle','--use-angle=gl','--enable-webgl','--ignore-gpu-blocklist']});
 const results={url,checks:[],views:[],errors:[],failures:[],performance:[]};
 const check=(name,condition)=>{if(!condition){results.failures.push(name);throw Error(name);}results.checks.push(name);console.log(`PASS ${name}`);};
-async function open(viewport,reducedMotion='reduce'){
- const page=await browser.newPage({viewport,reducedMotion});
+async function open(viewport,reducedMotion='reduce',deviceScaleFactor=1){
+ const page=await browser.newPage({viewport,reducedMotion,deviceScaleFactor});
  page.on('pageerror',error=>results.errors.push(error.message));
  page.on('console',message=>{if(message.type()==='error')results.errors.push(message.text());});
  page.on('response',response=>{if(response.status()>=400)results.errors.push(`${response.status()} ${response.url()}`);});
@@ -76,6 +76,17 @@ try{
   }
  }
  await page.close();
+ const retina=await open({width:390,height:844},'reduce',2);
+ const auto=await state(retina);
+ check('Auto is default and retains baseline quality',auto.quality==='auto'&&auto.pixelRatio===1);
+ await retina.locator('#advanced-controls summary').click();
+ for(const [quality,ratio] of [['high',1.5],['balanced',1],['auto',1]]){
+  await retina.locator('#quality').selectOption(quality);
+  const current=await state(retina);
+  check(`${quality} applies actual DPR2 drawing buffer`,current.pixelRatio===ratio&&current.drawingBuffer[0]===Math.floor(390*ratio)&&current.drawingBuffer[1]===Math.floor(844*ratio));
+  check(`${quality} compositor matches actual drawing buffer`,current.composerBuffer.every((n,i)=>Math.floor(n)===current.drawingBuffer[i]));
+ }
+ await retina.close();
  const motion=await open({width:1280,height:720},'no-preference');
  await configure(motion,{camera:'fpv',seconds:12,playing:true});
  const start=await state(motion),startTime=Date.now();
@@ -83,7 +94,7 @@ try{
  const end=await state(motion),elapsed=(Date.now()-startTime)/1000;
  check('normal motion advances trains',end.seconds>start.seconds&&end.trains[0].position!==start.trains[0].position);
  const fps=(end.renderedFrames-start.renderedFrames)/elapsed;
- results.performance.push({viewport:'1280x720',quality:'balanced',gpu:end.gpu,elapsed,frames:end.renderedFrames-start.renderedFrames,fps,drawCalls:end.drawCalls,triangles:end.triangles});
+ results.performance.push({viewport:'1280x720',quality:end.quality,gpu:end.gpu,elapsed,frames:end.renderedFrames-start.renderedFrames,fps,drawCalls:end.drawCalls,triangles:end.triangles});
  await motion.emulateMedia({reducedMotion:'reduce'});
  await motion.waitForFunction(()=>window.__sceneTools.get_valley_scene.execute().reducedMotion===true);
  check('live reduced-motion change pauses',(await state(motion)).playing===false);
