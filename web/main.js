@@ -1,5 +1,6 @@
 import { selectStudy } from './process.js';
-import { separationAt, REPLAY_DURATION } from './assembly-motion.js';
+import { createExplodedLayout, assemblyProgress, fitZoom, ASSEMBLY_IDS } from './exploded-layout.js';
+import { separationAt, replayPhase, REPLAY_DURATION } from './assembly-motion.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -10,11 +11,6 @@ const asset = (path) => `${import.meta.env.BASE_URL}generated/${path}`;
 const models = {
   heritage: { title: 'North Star No. 07', heading: 'North Star<br>No. 07', description: 'Forest green, warm brass, and an open running gear. A tribute to the age of steam.', wheels: '2-6-0', edition: 'HERITAGE / 01' },
   commodore: { title: 'Commodore Vanderbilt', heading: 'Commodore<br>Vanderbilt', description: 'A midnight-blue silhouette, swept wheel arches, and silver trim. Steam, dressed for the future.', wheels: '4-6-4', edition: 'STREAMLINED / 02' },
-};
-const offsets = {
-  '01': [0, 3.8, 0], '02': [0, 1.5, 0], '03': [0, 0, 2],
-  '04': [0, 1, 3.7], '05': [0, 3.2, -1.5], '06': [-1.2, 2, 1],
-  '07': [1.1, 2.5, 0], '08': [1.1, 0, 2], '09': [1.1, 1, 0],
 };
 const cache = new Map();
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -49,9 +45,9 @@ function seekReplay(seconds) {
   replayPosition = seconds;
   setExplosion(separationAt(seconds), true);
   currentExplosion = desiredExplosion;
-  if (active) for (const [key, entry] of active.assemblies) entry.group.position.fromArray(offsets[key]).multiplyScalar(currentExplosion);
+  applyExplosion();
   $('#replay-position').value = seconds;
-  $('#replay-status').textContent = `${seconds.toFixed(1)} / 12s`;
+  $('#replay-status').textContent = `${replayPhase(seconds)} · ${seconds.toFixed(1)}s`;
   dirty = true;
 }
 function playReplay() {
@@ -59,6 +55,7 @@ function playReplay() {
   if (replaying) { pauseReplay(); return; }
   if (replayPosition >= REPLAY_DURATION) replayPosition = 0;
   showAll();
+  if (replayPosition === 0) resetCamera();
   replaying = true;
   $('#replay').textContent = 'Pause sequence';
   $('#replay').setAttribute('aria-pressed', 'true');
@@ -80,17 +77,19 @@ function resize() {
   camera.bottom = -span / 2;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height, false);
+  applyExplosion();
   dirty = true;
 }
 
 function resetCamera(side = false) {
   if (!controls) return;
-  const e = desiredExplosion;
+  const e = 0;
   camera.position.set(side ? 1.5 : -11, side ? 2.5 + e * 2 : 10 + e * 2, side ? 23 : 17);
   controls.target.set(1.5, 1.5 + e * 1.5, 0);
-  camera.zoom = e > 0 ? 0.84 : 1;
+  camera.zoom = 1;
   camera.updateProjectionMatrix();
   controls.update();
+  applyExplosion();
   dirty = true;
 }
 
@@ -131,9 +130,10 @@ function initViewer() {
     addDisplayTrack();
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; controls.dampingFactor = 0.12;
-    controls.minZoom = 0.4; controls.maxZoom = 3;
+    controls.minZoom = 0.15; controls.maxZoom = 3;
     controls.maxPolarAngle = Math.PI * 0.49;
     controls.addEventListener('change', () => { dirty = true; });
+    controls.addEventListener('start', pauseReplay);
     new ResizeObserver(resize).observe($('#viewport'));
     resetCamera(); resize();
     renderAvailable = true;
@@ -148,10 +148,11 @@ function initViewer() {
         seekReplay(Math.min(REPLAY_DURATION, replayPosition + delta));
         if (replayPosition >= REPLAY_DURATION) pauseReplay();
       }
-      const moving = Math.abs(currentExplosion - desiredExplosion) > 0.001;
+      const moving = currentExplosion !== desiredExplosion;
       if (moving && active) {
         currentExplosion = reduceMotion ? desiredExplosion : THREE.MathUtils.damp(currentExplosion, desiredExplosion, 8, delta);
-        for (const [key, entry] of active.assemblies) entry.group.position.fromArray(offsets[key]).multiplyScalar(currentExplosion);
+        if (Math.abs(currentExplosion - desiredExplosion) < 0.0001) currentExplosion = desiredExplosion;
+        applyExplosion();
         dirty = true;
       }
       controls.update();
@@ -181,7 +182,8 @@ async function loadModel(slug) {
       assemblies.set(key, { group, title, count });
     }));
     scene.add(root);
-    return { root, manifest, assemblies: new Map([...assemblies].sort(([a], [b]) => a.localeCompare(b))) };
+    const layout = createExplodedLayout(assemblies);
+    return { root, manifest, layout, assemblies: new Map([...assemblies].sort(([a], [b]) => a.localeCompare(b))) };
   })();
   cache.set(slug, promise);
   try { return await promise; } catch (error) { cache.delete(slug); throw error; }
@@ -248,6 +250,16 @@ async function selectModel(slug) {
   }
 }
 
+function applyExplosion() {
+  if (!active || !camera) return;
+  for (const [id, entry] of active.assemblies) {
+    entry.group.position.copy(active.layout.offsets.get(id)).multiplyScalar(assemblyProgress(id, currentExplosion));
+  }
+  camera.zoom = fitZoom(active.assemblies, camera, controls.target);
+  camera.updateProjectionMatrix();
+  dirty = true;
+}
+
 function setExplosion(percent, fromReplay = false) {
   if (!fromReplay) pauseReplay();
   desiredExplosion = percent / 100;
@@ -257,7 +269,7 @@ function setExplosion(percent, fromReplay = false) {
   $('#exploded').setAttribute('aria-pressed', String(percent > 0));
   $('#view-label').textContent = percent === 0 ? 'ASSEMBLED VIEW' : 'EXPLODED VIEW';
   if (platform) platform.visible = percent === 0;
-  if (controls) { controls.target.y = 1.5 + desiredExplosion * 1.5; camera.zoom = 1 - desiredExplosion * 0.16; camera.updateProjectionMatrix(); }
+
   dirty = true;
 }
 
@@ -329,7 +341,7 @@ if (context?.registerTool) {
       if (!input || typeof input !== 'object' || Object.keys(input).some((key) => !['model', 'separation', 'visibleAssemblies'].includes(key))) throw new Error('Invalid view configuration.');
       if (input.model !== undefined && !(input.model in models)) throw new Error('Unknown model.');
       if (input.separation !== undefined && (!Number.isFinite(input.separation) || input.separation < 0 || input.separation > 100)) throw new Error('Separation must be between 0 and 100.');
-      if (input.visibleAssemblies !== undefined && (!Array.isArray(input.visibleAssemblies) || input.visibleAssemblies.some((id) => !(id in offsets)))) throw new Error('Unknown assembly ID.');
+      if (input.visibleAssemblies !== undefined && (!Array.isArray(input.visibleAssemblies) || input.visibleAssemblies.some((id) => !ASSEMBLY_IDS.includes(id)))) throw new Error('Unknown assembly ID.');
       if (input.model && (selected !== input.model || !active)) await selectModel(input.model);
       if (!active) throw new Error('The 3D model is not ready.');
       if (input.separation !== undefined) setExplosion(input.separation);
@@ -338,7 +350,7 @@ if (context?.registerTool) {
         renderAssemblyList();
       }
       currentExplosion = desiredExplosion;
-      for (const [id, e] of active.assemblies) e.group.position.fromArray(offsets[id]).multiplyScalar(currentExplosion);
+      applyExplosion();
       controls.update(); renderer.render(scene, camera); dirty = true;
       return getState();
     },

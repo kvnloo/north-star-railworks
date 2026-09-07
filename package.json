@@ -9,7 +9,7 @@
     "prebuild": "npm run prepare-assets",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "node --check web/main.js && node --check web/process.js && node --check scripts/prepare_site.mjs && node scripts/verify_motion.mjs && python3 scripts/verify_exports.py"
+    "check": "node --check web/main.js && node --check web/process.js && node --check scripts/prepare_site.mjs && node scripts/verify_motion.mjs && node scripts/verify_layout.mjs && python3 scripts/verify_exports.py"
   },
   "type": "module",
   "private": true,
