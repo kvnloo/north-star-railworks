@@ -1,5 +1,5 @@
 """Generate two original, modular locomotives. Run with Blender 4.5+ in background."""
-import bpy, math, os, json, random
+import bpy, math, json, random
 from mathutils import Vector
 from pathlib import Path
 SOURCE_ROOT=Path(__file__).resolve().parents[1]
@@ -7,7 +7,7 @@ ROOT=SOURCE_ROOT
 CONFIG={}
 RENDER=True
 random.seed(42)
-M={}; GROUPS={}; CACHE={}; CURRENT=None; PREFIX=''
+M={}; GROUPS={}; CACHE={}; CURRENT=None
 
 def mat(name, color, metal=0, rough=.35, emission=0):
     color=CONFIG.get('materials',{}).get(name,color)
